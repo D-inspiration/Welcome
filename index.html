@@ -1,28 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project in Progress</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StitchFlow — Tailor CRM That Actually Fits</title>
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #13161c; --surface-2: #1a1e27; --surface-3: #222836;
+    --accent: #00d4aa; --accent-hover: #00b894; --accent-dim: rgba(0,212,170,0.1);
+    --danger: #ff6b6b; --warning: #f0c040;
+    --text: #e8eaed; --text-2: #9aa0a6; --text-3: #5f6368;
+    --border: #2a2f3a; --green: #00d4aa; --red: #ff6b6b; --blue: #4dabf7; --purple: #be4bdb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
+  }
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,12,16,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  nav { display: flex; gap: 2rem; align-items: center; }
+  nav a { color: var(--text-2); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color .2s; }
+  nav a:hover { color: var(--accent); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+    border: none; cursor: pointer; transition: all .2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .hero {
+    padding: 10rem 2rem 6rem; text-align: center; max-width: 800px; margin: 0 auto;
+  }
+  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.2rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 1.15rem; color: var(--text-2); max-width: 560px; margin: 0 auto 2rem; }
+  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .steps { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
+  .steps h2 { text-align: center; font-size: 1.8rem; margin-bottom: 3rem; }
+  .step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .step-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 2rem; text-align: center; transition: all .2s;
+  }
+  .step-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--accent);
+    color: #000; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+  }
+  .step-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .step-card p { color: var(--text-2); font-size: 0.9rem; }
+  .pipeline-section {
+    padding: 4rem 2rem; background: var(--surface);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .pipeline-container { max-width: 900px; margin: 0 auto; }
+  .pipeline-section h2 { text-align: center; font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .pipeline-section .sub { text-align: center; color: var(--text-2); margin-bottom: 2.5rem; }
+  .pipeline {
+    display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+  }
+  .pipe-step {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem 1.5rem; text-align: center; min-width: 120px;
+  }
+  .pipe-step .status { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin: 0 auto 0.5rem; }
+  .pipe-step .status.waiting { background: var(--warning); }
+  .pipe-step .status.done { background: var(--green); }
+  .pipe-step h4 { font-size: 0.85rem; font-weight: 600; }
+  .pipe-step p { font-size: 0.75rem; color: var(--text-2); }
+  .pipe-arrow { display: flex; align-items: center; color: var(--text-3); font-size: 1.2rem; }
+  .features { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
+  .features h2 { text-align: center; font-size: 1.8rem; margin-bottom: 3rem; }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.8rem; transition: all .2s;
+  }
+  .feature-card:hover { border-color: var(--accent); }
+  .feature-card h3 { font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .feature-card p { color: var(--text-2); font-size: 0.9rem; }
+  .roadmap { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+  .roadmap h2 { text-align: center; font-size: 1.8rem; margin-bottom: 2rem; }
+  .roadmap-list { display: flex; flex-direction: column; gap: 1rem; }
+  .roadmap-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+  }
+  .roadmap-dot {
+    width: 12px; height: 12px; border-radius: 50%; margin-top: 0.3rem; flex-shrink: 0;
+  }
+  .roadmap-dot.now { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .roadmap-dot.soon { background: var(--warning); }
+  .roadmap-dot.later { background: var(--text-3); }
+  .roadmap-item h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .roadmap-item p { color: var(--text-2); font-size: 0.85rem; }
+  .roadmap-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; margin-left: 0.5rem;
+  }
+  .tag-now { background: var(--accent-dim); color: var(--accent); }
+  .tag-soon { background: rgba(240,192,64,0.15); color: var(--warning); }
+  .tag-later { background: var(--surface-3); color: var(--text-3); }
+  .cta-section {
+    padding: 4rem 2rem; text-align: center; background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .cta-section h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+  .cta-section p { color: var(--text-2); max-width: 500px; margin: 0 auto 1.5rem; }
+  footer { padding: 3rem 2rem; text-align: center; color: var(--text-2); font-size: 0.85rem; border-top: 1px solid var(--border); }
+  footer a { color: var(--accent); text-decoration: none; }
+  .admin-link {
+    position: fixed; bottom: 1rem; right: 1rem; background: var(--surface); border: 1px solid var(--border);
+    padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; color: var(--text-2); text-decoration: none;
+    opacity: 0.3; transition: opacity .2s;
+  }
+  .admin-link:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+  @media (max-width: 640px) {
+    header { padding: 1rem; }
+    nav { display: none; }
+    .hero { padding: 7rem 1rem 4rem; }
+    .step-grid, .feature-grid { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; align-items: center; }
+    .pipe-arrow { transform: rotate(90deg); }
+  }
+</style>
 </head>
 <body>
-  <main class="container">
-    <div class="card">
-      <h1>Site Under Development</h1>
-      <p class="subtitle">
-        This project is currently in its build phase.
-      </p>
 
-      <p class="message">
-        Core systems are being finalized, and testing will follow shortly.<br />
-        Thank you for contributing — your support is sincerely appreciated.
-      </p>
+<header>
+  <div class="logo">Stitch<span>Flow</span></div>
+  <nav>
+    <a href="#how-it-works" data-track="nav-how">How it Works</a>
+    <a href="#features" data-track="nav-features">Features</a>
+    <a href="#roadmap" data-track="nav-roadmap">Roadmap</a>
+    <a href="dashboard.html" class="btn btn-ghost" data-track="nav-dashboard">Analytics</a>
+  </nav>
+</header>
 
-      <div class="footer">
-        <span>— Project Team</span>
+<section class="hero">
+  <h1>A CRM Built for <span>Tailors</span>, Not Tech Bros</h1>
+  <p>Customer records. Measurements. Order pipeline. All in one fast, mobile-first tool. No spreadsheets. No lost notebooks. Just your workflow, compressed.</p>
+  <div class="hero-btns">
+    <a href="#how-it-works" class="btn btn-primary" data-track="hero-cta-primary">See How It Works</a>
+    <a href="#roadmap" class="btn btn-ghost" data-track="hero-cta-secondary">View Roadmap</a>
+  </div>
+</section>
+
+<section class="steps" id="how-it-works">
+  <h2>How It Works</h2>
+  <div class="step-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h3>Add a Customer</h3>
+      <p>Name, phone, and notes. Searchable instantly. No more flipping through notebooks.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h3>Save Measurements</h3>
+      <p>Structured fields for every measurement you need. Reuse them on every new order.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h3>Create an Order</h3>
+      <p>Link to customer, set due date, add fabric notes. One tap from the customer profile.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h3>Track Status</h3>
+      <p>Cutting &rarr; Sewing &rarr; Ready &rarr; Delivered. Update with a tap. Know exactly where every job stands.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pipeline-section" id="pipeline">
+  <div class="pipeline-container">
+    <h2>Your Order Pipeline</h2>
+    <p class="sub">Visual state tracking. No more "where is this order?"</p>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="status waiting"></div>
+        <h4>Cutting</h4>
+        <p>Pattern laid</p>
+      </div>
+      <div class="pipe-arrow">&#10132;</div>
+      <div class="pipe-step">
+        <div class="status waiting"></div>
+        <h4>Sewing</h4>
+        <p>In progress</p>
+      </div>
+      <div class="pipe-arrow">&#10132;</div>
+      <div class="pipe-step">
+        <div class="status"></div>
+        <h4>Ready</h4>
+        <p>Finishing</p>
+      </div>
+      <div class="pipe-arrow">&#10132;</div>
+      <div class="pipe-step">
+        <div class="status done"></div>
+        <h4>Delivered</h4>
+        <p>Done</p>
       </div>
     </div>
-  </main>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2>Built for Real Tailor Workflows</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h3>&#128270; Fast Search</h3>
+      <p>Find any customer by name or phone in under a second. Your entire customer base, instantly accessible.</p>
+    </div>
+    <div class="feature-card">
+      <h3>&#128208; Structured Measurements</h3>
+      <p>No free-form text chaos. Every measurement is stored in a clean schema you can reuse, compare, and report on.</p>
+    </div>
+    <div class="feature-card">
+      <h3>&#128197; Order Lifecycle</h3>
+      <p>Each order moves through clear stages. See bottlenecks, manage workload, and never miss a deadline.</p>
+    </div>
+    <div class="feature-card">
+      <h3>&#128241; Mobile-First</h3>
+      <p>Designed for phones first. Bottom-sheet inputs, quick actions, and one-hand usability. Because you're on the shop floor.</p>
+    </div>
+    <div class="feature-card">
+      <h3>&#128274; Secure Auth</h3>
+      <p>Session-based authentication with Flask. Your customer data stays yours. No third-party lock-in.</p>
+    </div>
+    <div class="feature-card">
+      <h3>&#9889; Minimal Clicks</h3>
+      <p>Every interaction is optimized for speed. Add a customer in 3 taps. Create an order in 5. Less UI, more work done.</p>
+    </div>
+  </div>
+</section>
+
+<section class="roadmap" id="roadmap">
+  <h2>What We're Building</h2>
+  <div class="roadmap-list">
+    <div class="roadmap-item">
+      <div class="roadmap-dot now"></div>
+      <div>
+        <h4>Core CRM Loop <span class="roadmap-tag tag-now">Now</span></h4>
+        <p>Customers, measurements, orders, search, and status tracking. The foundation that everything else sits on.</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot soon"></div>
+      <div>
+        <h4>Pipeline View & Quick Actions <span class="roadmap-tag tag-soon">Soon</span></h4>
+        <p>Visual kanban for orders. Bottom-sheet mobile UX. One-tap status updates from any screen.</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot soon"></div>
+      <div>
+        <h4>WhatsApp Sharing & Tracking <span class="roadmap-tag tag-soon">Soon</span></h4>
+        <p>Send order updates to customers via WhatsApp. Share tracking links so they know when to pick up.</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot later"></div>
+      <div>
+        <h4>Workload Intelligence <span class="roadmap-tag tag-later">Later</span></h4>
+        <p>Capacity warnings, delay predictions, and trend detection — once we have real usage data to learn from.</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot later"></div>
+      <div>
+        <h4>Expand to Barbers, Salons, Mechanics <span class="roadmap-tag tag-later">Later</span></h4>
+        <p>The same workflow compression logic, applied to other informal commerce verticals across West Africa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="cta">
+  <h2>Ready to Stop Losing Orders?</h2>
+  <p>We're building StitchFlow with real tailors. Want early access or have feedback? Reach out.</p>
+  <div class="hero-btns">
+    <a href="mailto: inspirante02@gmail.com" class="btn btn-primary" data-track="cta-email">Get Early Access</a>
+    <a href="#features" class="btn btn-ghost" data-track="cta-features">Explore Features</a>
+  </div>
+</section>
+
+<footer>
+  <p>StitchFlow — Built for tailors who'd rather sew than administrate.</p>
+  <p style="margin-top:0.5rem;"><a href="dashboard.html" data-track="footer-dashboard">Analytics Dashboard</a></p>
+</footer>
+
+<a href="dashboard.html" class="admin-link" data-track="admin-dashboard-link">&#128202; Dashboard</a>
+
+<script>
+/* Sprint Analytics Tracker v1.0 — Drop into any page */
+(function() {
+  'use strict';
+
+  const STORE_KEY = 'sprint_analytics_v1';
+  const SESSION_KEY = 'sprint_session_id';
+  const MAX_EVENTS = 8000;
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultData(); }
+    catch(e) { return defaultData(); }
+  }
+  function save(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
+  function defaultData() {
+    return { events: [], sessions: {}, pages: {}, startedAt: Date.now(), version: 1 };
+  }
+
+  let sessionId = sessionStorage.getItem(SESSION_KEY);
+  let data = load();
+  let sessionStart = Date.now();
+  let maxScroll = 0;
+  let clickCount = 0;
+  let inputCount = 0;
+
+  if (!sessionId) {
+    sessionId = 'sess_' + Math.random().toString(36).slice(2, 9) + '_' + Date.now().toString(36).slice(-4);
+    sessionStorage.setItem(SESSION_KEY, sessionId);
+    data.sessions[sessionId] = {
+      start: sessionStart, duration: 0, taps: 0, inputs: 0, scrollDepth: 0,
+      ended: false, page: location.pathname + location.search
+    };
+    save(data);
+  } else {
+    sessionStart = Date.now() - (data.sessions[sessionId]?.duration || 0);
+  }
+
+  function track(type, detail) {
+    const ev = {
+      id: Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6),
+      type: type, timestamp: Date.now(), sessionId: sessionId,
+      page: location.pathname + location.search, detail: detail || {},
+      url: location.href, referrer: document.referrer || '',
+      viewport: { w: window.innerWidth, h: window.innerHeight },
+      ua: navigator.userAgent.slice(0, 80)
+    };
+    data.events.push(ev);
+    if (data.events.length > MAX_EVENTS) {
+      data.events = data.events.slice(-Math.floor(MAX_EVENTS * 0.8));
+    }
+    const pageKey = location.pathname + location.search;
+    if (!data.pages[pageKey]) {
+      data.pages[pageKey] = { visits: 0, clicks: 0, inputs: 0, avgScroll: 0, lastVisit: 0 };
+    }
+    data.pages[pageKey].lastVisit = Date.now();
+    if (type === 'click') data.pages[pageKey].clicks++;
+    if (type === 'input') data.pages[pageKey].inputs++;
+    save(data);
+    if (typeof BroadcastChannel !== 'undefined') {
+      const bc = new BroadcastChannel('sprint_analytics');
+      bc.postMessage({ action: 'track', type: type });
+      bc.close();
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-track]') || e.target;
+    const trackName = target.getAttribute('data-track');
+    const elName = trackName || (
+      target.tagName.toLowerCase() +
+      (target.id ? '#' + target.id : '') +
+      (target.className && typeof target.className === 'string' ? '.' + target.className.split(' ')[0] : '')
+    );
+    track('click', {
+      element: elName,
+      text: (target.innerText || target.value || target.alt || target.title || '').toString().slice(0, 60),
+      x: e.clientX, y: e.clientY,
+      path: e.composedPath ? e.composedPath().map(el => el.tagName).filter(Boolean).slice(0, 5).join(' > ') : ''
+    });
+    clickCount++;
+    if (data.sessions[sessionId]) data.sessions[sessionId].taps = clickCount;
+    save(data);
+  });
+
+  let scrollTimer;
+  window.addEventListener('scroll', function() {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() {
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const depth = docH > 0 ? Math.round((window.scrollY / docH) * 100) : 0;
+      if (depth > maxScroll) {
+        maxScroll = depth;
+        track('scroll', { depth: depth + '%', pixel: Math.round(window.scrollY) });
+        if (data.sessions[sessionId]) data.sessions[sessionId].scrollDepth = maxScroll;
+        save(data);
+      }
+    }, 400);
+  });
+
+  document.addEventListener('input', function(e) {
+    const t = e.target;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) {
+      const name = t.getAttribute('data-track') || t.name || t.id || t.placeholder?.slice(0, 20) || 'input';
+      track('input', {
+        element: name, length: (t.value || t.textContent || '').length, type: t.type || 'text'
+      });
+      inputCount++;
+      if (data.sessions[sessionId]) data.sessions[sessionId].inputs = inputCount;
+      save(data);
+    }
+  });
+
+  document.addEventListener('focusin', function(e) {
+    const t = e.target;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') {
+      track('focus', { element: t.getAttribute('data-track') || t.name || t.id || 'input', type: t.type || 'text' });
+    }
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden && data.sessions[sessionId]) {
+      data.sessions[sessionId].duration = Date.now() - sessionStart;
+      save(data);
+    }
+  });
+
+  window.addEventListener('beforeunload', function() {
+    if (data.sessions[sessionId]) {
+      data.sessions[sessionId].duration = Date.now() - sessionStart;
+      data.sessions[sessionId].ended = true;
+      data.sessions[sessionId].scrollDepth = maxScroll;
+      save(data);
+    }
+  });
+
+  setInterval(function() {
+    if (data.sessions[sessionId]) {
+      data.sessions[sessionId].duration = Date.now() - sessionStart;
+      save(data);
+    }
+  }, 10000);
+
+  const pageKey = location.pathname + location.search;
+  data.pages[pageKey] = data.pages[pageKey] || { visits: 0, clicks: 0, inputs: 0, avgScroll: 0, lastVisit: 0 };
+  data.pages[pageKey].visits++;
+  save(data);
+
+  track('pageview', {
+    title: document.title, path: location.pathname, search: location.search, referrer: document.referrer || ''
+  });
+
+  window.SprintAnalytics = {
+    track: track,
+    getData: function() { return load(); },
+    getSession: function() { return sessionId; },
+    clear: function() {
+      if (confirm('Clear all analytics data?')) {
+        localStorage.removeItem(STORE_KEY);
+        location.reload();
+      }
+    }
+  };
+
+  console.log('[SprintAnalytics] Tracking active. Session:', sessionId.slice(-8));
+})();
+</script>
+
 </body>
 </html>

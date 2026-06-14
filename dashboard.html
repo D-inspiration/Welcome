@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StitchFlow Analytics — Private</title>
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #13161c; --surface-2: #1a1e27; --surface-3: #222836;
+    --accent: #00d4aa; --accent-dim: rgba(0,212,170,0.1); --danger: #ff6b6b; --warning: #f0c040;
+    --text: #e8eaed; --text-2: #9aa0a6; --text-3: #5f6368;
+    --border: #2a2f3a; --green: #00d4aa; --red: #ff6b6b; --blue: #4dabf7; --purple: #be4bdb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+  }
+
+  /* PIN Gate */
+  #pinGate {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #pinGate.hidden { display: none !important; }
+  .pin-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 2.5rem; text-align: center; max-width: 360px; width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .pin-box .lock-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .pin-box h2 { font-size: 1.3rem; margin-bottom: 0.3rem; }
+  .pin-box p { color: var(--text-2); font-size: 0.85rem; margin-bottom: 1.5rem; }
+  .pin-dots {
+    display: flex; gap: 0.8rem; justify-content: center; margin-bottom: 1.5rem;
+  }
+  .pin-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--border); transition: all .2s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-dot.wrong { border-color: var(--danger); animation: shake .4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+  .pin-error {
+    color: var(--danger); font-size: 0.8rem; margin-bottom: 1rem; min-height: 1.2rem;
+    opacity: 0; transition: opacity .2s;
+  }
+  .pin-error.show { opacity: 1; }
+  .pin-pad {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
+  }
+  .pin-key {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem; font-size: 1.2rem; font-weight: 600; color: var(--text);
+    cursor: pointer; transition: all .15s; user-select: none;
+  }
+  .pin-key:hover { background: var(--surface-3); border-color: var(--accent); }
+  .pin-key:active { transform: scale(0.95); }
+  .pin-key.wide { grid-column: span 2; }
+
+  /* Dashboard */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,12,16,0.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo { font-size: 1.3rem; font-weight: 800; }
+  .logo span { color: var(--accent); }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-dim); color: var(--accent); padding: 4px 12px;
+    border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+  }
+  .live-pill::before { content: ''; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .container { max-width: 1400px; margin: 0 auto; padding: 6rem 2rem 2rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.4rem; position: relative; overflow: hidden;
+  }
+  .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-2); margin-bottom: 0.4rem; }
+  .card .value { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
+  .card .delta { font-size: 0.8rem; margin-top: 0.2rem; font-weight: 500; }
+  .delta.up { color: var(--green); } .delta.down { color: var(--red); }
+  .card .icon {
+    position: absolute; right: 1rem; top: 1rem; width: 36px; height: 36px;
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+  }
+  .bg-green { background: rgba(0,212,170,0.1); color: var(--green); }
+  .bg-red { background: rgba(255,107,107,0.1); color: var(--red); }
+  .bg-blue { background: rgba(77,171,247,0.1); color: var(--blue); }
+  .bg-purple { background: rgba(190,75,219,0.1); color: var(--purple); }
+  .bg-yellow { background: rgba(240,192,64,0.1); color: var(--warning); }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .section h2 { font-size: 1.05rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .btn {
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+    padding: 0.45rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 500;
+    transition: all .2s; font-size: 0.85rem;
+  }
+  .btn:hover { background: var(--surface-3); border-color: var(--accent); }
+  .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn.danger { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn.danger:hover { background: #ff5252; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-2); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;
+  }
+  .tag-click { background: rgba(0,212,170,0.15); color: var(--green); }
+  .tag-scroll { background: rgba(77,171,247,0.15); color: var(--blue); }
+  .tag-input { background: rgba(190,75,219,0.15); color: var(--purple); }
+  .tag-page { background: rgba(240,192,64,0.15); color: var(--warning); }
+  .tag-focus { background: rgba(255,107,107,0.15); color: var(--red); }
+  .funnel { display: flex; flex-direction: column; gap: 0.5rem; }
+  .funnel-row { display: flex; align-items: center; gap: 1rem; }
+  .funnel-bar-wrap { flex: 1; height: 32px; background: var(--surface-2); border-radius: 8px; overflow: hidden; position: relative; }
+  .funnel-bar { height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 0.8rem; font-size: 0.8rem; font-weight: 600; transition: width .6s ease; }
+  .funnel-label { width: 140px; font-size: 0.8rem; color: var(--text-2); text-align: right; }
+  .funnel-pct { width: 50px; font-size: 0.8rem; color: var(--text-2); text-align: right; }
+  .heatmap-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 0.5rem; }
+  .heat-cell { aspect-ratio: 1; border-radius: 3px; background: var(--surface-2); transition: all .3s; }
+  .heat-cell.h1 { background: rgba(0,212,170,0.9); }
+  .heat-cell.h2 { background: rgba(0,212,170,0.6); }
+  .heat-cell.h3 { background: rgba(0,212,170,0.3); }
+  .heat-cell.h4 { background: rgba(0,212,170,0.12); }
+  .bar-chart { display: flex; flex-direction: column; gap: 0.6rem; }
+  .bar-row { display: flex; align-items: center; gap: 0.8rem; }
+  .bar-label { width: 120px; font-size: 0.8rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; height: 22px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width .5s ease; display: flex; align-items: center; padding-right: 0.5rem; justify-content: flex-end; font-size: 0.7rem; font-weight: 700; color: #000; }
+  .json-view {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; font-family: 'SF Mono', Monaco, monospace; font-size: 0.78rem;
+    max-height: 350px; overflow: auto; white-space: pre-wrap; color: var(--text-2); line-height: 1.6;
+  }
+  .empty { text-align: center; padding: 3rem; color: var(--text-3); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+  @media (max-width: 768px) {
+    .container { padding: 5rem 1rem 1rem; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .card .value { font-size: 1.6rem; }
+    .funnel-label { width: 100px; font-size: 0.75rem; }
+    .pin-box { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PIN GATE -->
+<div id="pinGate">
+  <div class="pin-box">
+    <div class="lock-icon">&#128274;</div>
+    <h2>Private Analytics</h2>
+    <p>Enter your 6-digit PIN to access the StitchFlow dashboard.</p>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="pin-error" id="pinError">Incorrect PIN. Try again.</div>
+    <div class="pin-pad" id="pinPad">
+      <div class="pin-key" data-key="1">1</div>
+      <div class="pin-key" data-key="2">2</div>
+      <div class="pin-key" data-key="3">3</div>
+      <div class="pin-key" data-key="4">4</div>
+      <div class="pin-key" data-key="5">5</div>
+      <div class="pin-key" data-key="6">6</div>
+      <div class="pin-key" data-key="7">7</div>
+      <div class="pin-key" data-key="8">8</div>
+      <div class="pin-key" data-key="9">9</div>
+      <div class="pin-key wide" data-key="clear">Clear</div>
+      <div class="pin-key" data-key="0">0</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+<header>
+  <div class="logo">Stitch<span>Flow</span> Analytics</div>
+  <div style="display:flex;gap:0.75rem;align-items:center;">
+    <div class="live-pill" id="livePill">Live</div>
+    <button class="btn" onclick="lockOut()" title="Lock dashboard">&#128274; Lock</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="icon bg-green">&#128070;</div>
+      <h3>Total Clicks</h3>
+      <div class="value" id="kpiClicks">0</div>
+      <div class="delta" id="kpiClicksDelta">&mdash;</div>
+    </div>
+    <div class="card">
+      <div class="icon bg-blue">&#128065;</div>
+      <h3>Unique Sessions</h3>
+      <div class="value" id="kpiSessions">0</div>
+      <div class="delta" id="kpiSessionsDelta">&mdash;</div>
+    </div>
+    <div class="card">
+      <div class="icon bg-purple">&#9201;</div>
+      <h3>Avg. Session</h3>
+      <div class="value" id="kpiAvgSession">0s</div>
+      <div class="delta" id="kpiAvgDelta">&mdash;</div>
+    </div>
+    <div class="card">
+      <div class="icon bg-yellow">&#127919;</div>
+      <h3>Scroll Depth</h3>
+      <div class="value" id="kpiScroll">0%</div>
+      <div class="delta" id="kpiScrollDelta">&mdash;</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="section">
+      <h2>&#128200; Click Funnel</h2>
+      <div class="funnel" id="funnel">
+        <div class="empty"><div class="empty-icon">&#128235;</div><p>No data yet. Visitors haven't interacted with the tracked elements.</p></div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>&#128293; Most Clicked Elements</h2>
+      <div class="bar-chart" id="topElements">
+        <div class="empty"><div class="empty-icon">&#128235;</div><p>No clicks recorded yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="section">
+      <h2>&#128197; Click Heatmap (Last 24h)</h2>
+      <div class="heatmap-grid" id="heatmap"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:0.4rem;font-size:0.7rem;color:var(--text-3);">
+        <span>Now</span><span>12h</span><span>24h ago</span>
+      </div>
+    </div>
+    <div class="section">
+      <h2>&#128196; Page Performance</h2>
+      <table>
+        <thead><tr><th>Page</th><th>Visits</th><th>Clicks</th><th>Inputs</th><th>Last Visit</th></tr></thead>
+        <tbody id="pageTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>&#128203; Event Stream</h2>
+    <div class="controls">
+      <button class="btn active" onclick="setFilter('all')" id="f-all">All</button>
+      <button class="btn" onclick="setFilter('click')" id="f-click">Clicks</button>
+      <button class="btn" onclick="setFilter('input')" id="f-input">Inputs</button>
+      <button class="btn" onclick="setFilter('scroll')" id="f-scroll">Scrolls</button>
+      <button class="btn" onclick="setFilter('focus')" id="f-focus">Focus</button>
+      <button class="btn" onclick="setFilter('pageview')" id="f-pageview">Pageviews</button>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="exportJSON()">&#11015; JSON</button>
+      <button class="btn" onclick="exportCSV()">&#11015; CSV</button>
+      <button class="btn danger" onclick="clearAll()">Clear</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Time</th><th>Type</th><th>Element</th><th>Details</th><th>Session</th></tr></thead>
+        <tbody id="eventTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>&#128269; Raw Data Inspector</h2>
+    <div class="json-view" id="rawData">Loading...</div>
+  </div>
+
+</div>
+
+</div><!-- /dashboard -->
+
+<script>
+/* ========== PIN GATE ========== */
+const CORRECT_PIN = '269450';
+const PIN_KEY = 'stitchflow_auth';
+let enteredPin = '';
+
+function checkAuth() {
+  try {
+    const auth = sessionStorage.getItem(PIN_KEY);
+    if (auth) {
+      const data = JSON.parse(auth);
+      if (data.unlocked && data.expires > Date.now()) {
+        showDashboard();
+        return;
+      }
+    }
+  } catch(e) {}
+  showPinGate();
+}
+
+function showPinGate() {
+  document.getElementById('pinGate').classList.remove('hidden');
+  document.getElementById('dashboard').style.display = 'none';
+  enteredPin = '';
+  updatePinDots();
+}
+
+function showDashboard() {
+  document.getElementById('pinGate').classList.add('hidden');
+  document.getElementById('dashboard').style.display = 'block';
+  render();
+}
+
+function lockOut() {
+  sessionStorage.removeItem(PIN_KEY);
+  showPinGate();
+}
+
+function updatePinDots() {
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach((d, i) => {
+    d.classList.toggle('filled', i < enteredPin.length);
+    d.classList.remove('wrong');
+  });
+}
+
+function pinError() {
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach(d => d.classList.add('wrong'));
+  document.getElementById('pinError').classList.add('show');
+  setTimeout(() => {
+    dots.forEach(d => d.classList.remove('wrong'));
+    document.getElementById('pinError').classList.remove('show');
+  }, 1200);
+}
+
+function handlePinKey(key) {
+  if (key === 'clear') {
+    enteredPin = '';
+    updatePinDots();
+    return;
+  }
+  if (enteredPin.length < 6) {
+    enteredPin += key;
+    updatePinDots();
+    if (enteredPin.length === 6) {
+      if (enteredPin === CORRECT_PIN) {
+        sessionStorage.setItem(PIN_KEY, JSON.stringify({ unlocked: true, expires: Date.now() + 30 * 60 * 1000 }));
+        showDashboard();
+      } else {
+        pinError();
+        enteredPin = '';
+        setTimeout(updatePinDots, 400);
+      }
+    }
+  }
+}
+
+document.getElementById('pinPad').addEventListener('click', function(e) {
+  const key = e.target.closest('.pin-key');
+  if (key) handlePinKey(key.dataset.key);
+});
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('pinGate').classList.contains('hidden')) return;
+  if (e.key >= '0' && e.key <= '9') handlePinKey(e.key);
+  if (e.key === 'Backspace' || e.key === 'Escape') handlePinKey('clear');
+  if (e.key === 'Enter' && enteredPin.length === 6) {
+    if (enteredPin === CORRECT_PIN) {
+      sessionStorage.setItem(PIN_KEY, JSON.stringify({ unlocked: true, expires: Date.now() + 30 * 60 * 1000 }));
+      showDashboard();
+    } else {
+      pinError();
+      enteredPin = '';
+      setTimeout(updatePinDots, 400);
+    }
+  }
+});
+
+/* ========== ANALYTICS DASHBOARD ========== */
+const STORE_KEY = 'sprint_analytics_v1';
+let data = { events: [], sessions: {}, pages: {}, startedAt: Date.now(), version: 1 };
+let filterType = 'all';
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch(e) { console.error('Failed to load analytics data', e); }
+}
+
+function formatTime(ms) {
+  const s = Math.round(ms / 1000);
+  if (s < 60) return s + 's';
+  const m = Math.floor(s / 60), r = s % 60;
+  if (m < 60) return m + 'm ' + r + 's';
+  const h = Math.floor(m / 60);
+  return h + 'h ' + (m % 60) + 'm';
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+  return Math.floor(diff/86400000) + 'd ago';
+}
+
+function render() {
+  load();
+  const events = data.events || [];
+  const sessions = Object.values(data.sessions || {});
+  const pages = data.pages || {};
+
+  const clicks = events.filter(e => e.type === 'click');
+  document.getElementById('kpiClicks').textContent = clicks.length;
+  document.getElementById('kpiClicksDelta').textContent = sessions.length > 0 ? Math.round(clicks.length / sessions.length) + ' per session' : '—';
+
+  document.getElementById('kpiSessions').textContent = sessions.length;
+  document.getElementById('kpiSessionsDelta').textContent = sessions.filter(s => !s.ended).length + ' active';
+
+  const avgDur = sessions.length ? sessions.reduce((a,s) => a + (s.duration || 0), 0) / sessions.length : 0;
+  document.getElementById('kpiAvgSession').textContent = formatTime(avgDur);
+  document.getElementById('kpiAvgDelta').textContent = sessions.length ? 'across ' + sessions.length + ' sessions' : '—';
+
+  const avgScroll = sessions.length ? Math.round(sessions.reduce((a,s) => a + (s.scrollDepth || 0), 0) / sessions.length) : 0;
+  document.getElementById('kpiScroll').textContent = avgScroll + '%';
+  document.getElementById('kpiScrollDelta').textContent = avgScroll > 50 ? 'Good engagement' : avgScroll > 20 ? 'Average' : 'Low';
+
+  const funnelEl = document.getElementById('funnel');
+  if (events.length === 0) {
+    funnelEl.innerHTML = '<div class="empty"><div class="empty-icon">&#128235;</div><p>No data yet. Interact with the main page to see funnel data.</p></div>';
+  } else {
+    const steps = [
+      { name: 'Page Load', track: 'pageview', color: '#4dabf7' },
+      { name: 'Hero CTA', track: 'hero-cta-primary', color: '#00d4aa' },
+      { name: 'How It Works', track: 'nav-how', color: '#00d4aa' },
+      { name: 'Features', track: 'nav-features', color: '#00d4aa' },
+      { name: 'Roadmap', track: 'nav-roadmap', color: '#00d4aa' },
+      { name: 'Get Early Access', track: 'cta-email', color: '#be4bdb' }
+    ];
+    const base = events.filter(e => e.type === 'pageview').length || 1;
+    let html = '';
+    steps.forEach((step) => {
+      const count = events.filter(e => (e.detail && e.detail.element === step.track) || e.type === step.track).length;
+      const pct = Math.round((count / base) * 100);
+      const width = Math.max(pct, 5);
+      html += '<div class="funnel-row"><div class="funnel-label">' + step.name + '</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + width + '%;background:' + step.color + ';">' + count + '</div></div><div class="funnel-pct">' + pct + '%</div></div>';
+    });
+    funnelEl.innerHTML = html;
+  }
+
+  const topEl = document.getElementById('topElements');
+  const elCounts = {};
+  clicks.forEach(e => { const n = e.detail?.element || 'unknown'; elCounts[n] = (elCounts[n]||0)+1; });
+  const sorted = Object.entries(elCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  if (sorted.length === 0) {
+    topEl.innerHTML = '<div class="empty"><div class="empty-icon">&#128235;</div><p>No clicks yet.</p></div>';
+  } else {
+    const max = sorted[0][1];
+    const colors = ['#00d4aa','#4dabf7','#be4bdb','#f0c040','#ff6b6b','#51cf66','#339af0','#cc5de8'];
+    topEl.innerHTML = sorted.map(([name, count], i) => {
+      const pct = Math.round((count / max) * 100);
+      return '<div class="bar-row"><div class="bar-label" title="' + name + '">' + name + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + colors[i%colors.length] + ';">' + count + '</div></div></div>';
+    }).join('');
+  }
+
+  const heatmap = document.getElementById('heatmap');
+  heatmap.innerHTML = '';
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  for (let i = 0; i < 48; i++) {
+    const start = now - (i + 1) * (day / 48);
+    const end = now - i * (day / 48);
+    const count = events.filter(e => e.timestamp >= start && e.timestamp < end && e.type === 'click').length;
+    const cell = document.createElement('div');
+    cell.className = 'heat-cell' + (count > 10 ? ' h1' : count > 5 ? ' h2' : count > 2 ? ' h3' : count > 0 ? ' h4' : '');
+    cell.title = new Date(start).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ': ' + count + ' clicks';
+    heatmap.appendChild(cell);
+  }
+
+  const pageTbody = document.getElementById('pageTable');
+  const pageEntries = Object.entries(pages).sort((a,b) => b[1].lastVisit - a[1].lastVisit);
+  pageTbody.innerHTML = pageEntries.map(([path, stats]) =>
+    '<tr><td style="font-size:0.8rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="' + path + '">' + path + '</td><td>' + stats.visits + '</td><td>' + stats.clicks + '</td><td>' + stats.inputs + '</td><td style="font-size:0.75rem;color:var(--text-3);">' + timeAgo(stats.lastVisit) + '</td></tr>'
+  ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:2rem;">No page data</td></tr>';
+
+  const tbody = document.getElementById('eventTable');
+  const filtered = events.filter(e => filterType === 'all' || e.type === filterType).slice().reverse().slice(0, 60);
+  tbody.innerHTML = filtered.map(e => {
+    const tagMap = { click: 'tag-click', scroll: 'tag-scroll', input: 'tag-input', pageview: 'tag-page', focus: 'tag-focus' };
+    const tagClass = tagMap[e.type] || 'tag-page';
+    const detail = e.detail || {};
+    const detailStr = JSON.stringify(detail).slice(0, 55) + (JSON.stringify(detail).length > 55 ? '...' : '');
+    return '<tr><td style="font-size:0.78rem;white-space:nowrap;">' + new Date(e.timestamp).toLocaleTimeString() + '</td><td><span class="tag ' + tagClass + '">' + e.type + '</span></td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (detail.element || '') + '">' + (detail.element || '—') + '</td><td style="color:var(--text-2);font-size:0.78rem;max-width:250px;overflow:hidden;text-overflow:ellipsis;">' + detailStr + '</td><td style="font-size:0.72rem;color:var(--text-3);font-family:monospace;">' + (e.sessionId || '').slice(-8) + '</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:2rem;">No events</td></tr>';
+
+  const raw = document.getElementById('rawData');
+  const summary = {
+    totalEvents: events.length, totalSessions: sessions.length, totalPages: pageEntries.length,
+    storageSizeKB: Math.round(JSON.stringify(data).length / 1024 * 10) / 10,
+    started: new Date(data.startedAt || Date.now()).toISOString(), recentEvents: events.slice(-5)
+  };
+  raw.textContent = JSON.stringify(summary, null, 2);
+}
+
+function setFilter(type) {
+  filterType = type;
+  document.querySelectorAll('.controls .btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('f-' + type).classList.add('active');
+  render();
+}
+
+function exportJSON() {
+  load();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'stitchflow-analytics-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function exportCSV() {
+  load();
+  const rows = [['timestamp','type','sessionId','page','element','x','y','detail_json']];
+  (data.events || []).forEach(e => {
+    rows.push([new Date(e.timestamp).toISOString(), e.type, e.sessionId || '', e.page || '', (e.detail?.element || ''), (e.detail?.x || ''), (e.detail?.y || ''), JSON.stringify(e.detail || {})]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'stitchflow-analytics-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+function clearAll() {
+  if (confirm('Permanently delete ALL analytics data?')) {
+    localStorage.removeItem(STORE_KEY);
+    location.reload();
+  }
+}
+
+if (typeof BroadcastChannel !== 'undefined') {
+  const bc = new BroadcastChannel('sprint_analytics');
+  bc.onmessage = () => render();
+}
+
+// Init
+checkAuth();
+setInterval(render, 3000);
+</script>
+</body>
+</html>

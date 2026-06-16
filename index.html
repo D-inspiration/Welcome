@@ -291,7 +291,7 @@
   <h2>Ready to Stop Losing Orders?</h2>
   <p>We're building StitchFlow with real tailors. Want early access or have feedback? Reach out.</p>
   <div class="hero-btns">
-    <a href="mailto: inspirante02@gmail.com" class="btn btn-primary" data-track="cta-email">Get Early Access</a>
+    <a href="mailto:hello@stitchflow.app" class="btn btn-primary" data-track="cta-email">Get Early Access</a>
     <a href="#features" class="btn btn-ghost" data-track="cta-features">Explore Features</a>
   </div>
 </section>
@@ -470,5 +470,68 @@
 })();
 </script>
 
+<!-- Service Wake & Status + CRM Link -->
+<div id="svcStatus" style="position:fixed;bottom:6.5rem;right:1rem;background:var(--surface);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:8px;font-size:0.75rem;color:var(--text-2);display:flex;align-items:center;gap:0.5rem;z-index:99;opacity:0;transition:opacity 0.4s;">
+  <span id="svcDot" style="width:7px;height:7px;border-radius:50%;background:var(--warning);display:inline-block;"></span>
+  <span id="svcText">Waking services...</span>
+</div>
+
+<a href="https://tailor-webapp-ahdi.onrender.com/" id="crmBtn" style="position:fixed;bottom:3.5rem;right:1rem;background:var(--accent);color:#000;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;z-index:99;transition:opacity 0.4s,transform 0.2s;box-shadow:0 4px 12px rgba(0,212,170,0.2);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">&#128187; Open CRM</a>
+
+<script>
+const AUTH_URL = "https://flask-auth-engine.onrender.com/health";
+const CRM_URL  = "https://tailor-webapp-ahdi.onrender.com/health/";
+const CRM_APP_URL = "https://tailor-webapp-ahdi.onrender.com/";
+
+function showStatus(text, color) {
+  const el = document.getElementById('svcStatus');
+  const dot = document.getElementById('svcDot');
+  const txt = document.getElementById('svcText');
+  txt.textContent = text;
+  dot.style.background = color === 'green' ? 'var(--green)' : color === 'red' ? 'var(--red)' : 'var(--warning)';
+  el.style.opacity = '1';
+  if (color === 'green') setTimeout(() => { el.style.opacity = '0'; }, 5000);
+}
+
+async function wakeService(url, label) {
+  try {
+    const res = await fetch(url, { mode: "cors", cache: "no-store", method: "GET" });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    console.log('[' + label + '] Health OK:', data);
+    return true;
+  } catch (err) {
+    console.log('[' + label + '] Health failed:', err.message);
+    return false;
+  }
+}
+
+async function wakeServices() {
+  showStatus('Waking services...', 'yellow');
+  const [authOk, crmOk] = await Promise.all([
+    wakeService(AUTH_URL, 'AUTH'),
+    wakeService(CRM_URL, 'CRM')
+  ]);
+
+  if (authOk && crmOk) {
+    showStatus('All services ready', 'green');
+    window._servicesReady = true;
+  } else if (authOk || crmOk) {
+    showStatus('Some services waking...', 'yellow');
+    window._servicesReady = 'partial';
+  } else {
+    showStatus('Services offline — click Open CRM to wake', 'red');
+    window._servicesReady = false;
+  }
+}
+
+// Wake on page load
+wakeServices();
+
+// Re-wake on visibility change (tab back)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) wakeServices();
+});
+</script>
 </body>
 </html>

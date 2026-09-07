@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StitchFlow Analytics — Private</title>
+<title>TixThreads Analytics — Private</title>
 <style>
   :root {
     --bg: #0a0c10; --surface: #13161c; --surface-2: #1a1e27; --surface-3: #222836;
@@ -160,7 +160,7 @@
   <div class="pin-box">
     <div class="lock-icon">&#128274;</div>
     <h2>Private Analytics</h2>
-    <p>Enter your 6-digit PIN to access the StitchFlow dashboard.</p>
+    <p>Enter your 6-digit PIN to access the TixThreads dashboard.</p>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -288,7 +288,7 @@
 <script>
 /* ========== PIN GATE ========== */
 const CORRECT_PIN = '269450';
-const PIN_KEY = 'stitchflow_auth';
+const PIN_KEY = 'tixthreads_auth';
 let enteredPin = '';
 
 function checkAuth() {
@@ -523,7 +523,7 @@ function exportJSON() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'stitchflow-analytics-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'tixthreads-analytics-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
 }
 
@@ -537,7 +537,7 @@ function exportCSV() {
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'stitchflow-analytics-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'tixthreads-analytics-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
 

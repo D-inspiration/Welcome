@@ -1,16 +1,16 @@
-# Atrivix — company site, StitchFlow product page, and blog
+# Atrivix — company site, TixThreads product page, and blog
 
 ## Structure
 - `index.html` — **Atrivix**, the parent company homepage (root). New file, a starting stub — flesh it out.
-- `services/stitchflow/` — your existing StitchFlow landing page + `dashboard.html` + `tracker.js` + `style.css`, moved here unchanged as a product sub-route. Same pattern as `dashboard.html` already was — just one level deeper.
+- `services/tixthreads/` — your existing TixThreads landing page + `dashboard.html` + `tracker.js` + `style.css`, moved here unchanged as a product sub-route. Same pattern as `dashboard.html` already was — just one level deeper.
 - `blog/` — the **company** blog (Atrivix-branded), lives at root `/blog/` per the SEO reasoning: you want search engines indexing the brand, not a single product's login flow.
 - `posts/` — where you write new blog posts in Markdown.
 - `build_blog.py` — zero-dependency Python script (stdlib only) that turns `.md` files into styled HTML blog pages, run locally before you push. Not Jekyll, not pyscript/brython — nothing Python-related ever reaches the browser. GitHub Pages just serves the plain HTML it outputs.
 
 ## URLs once deployed
 - `atrivix.com/` → Atrivix homepage
-- `atrivix.com/services/stitchflow/` → StitchFlow landing page
-- `atrivix.com/services/stitchflow/dashboard.html` → StitchFlow analytics dashboard
+- `atrivix.com/services/tixthreads/` → TixThreads landing page
+- `atrivix.com/services/tixthreads/dashboard.html` → TixThreads analytics dashboard
 - `atrivix.com/blog/` → company blog
 - Later, add more products the same way: `services/tradebot/`, `services/anchor-protocol/`, etc.
 
@@ -32,7 +32,7 @@ Jekyll's `_posts`/`_layouts` system only auto-builds if you're hosted on real `u
 Generated files are plain HTML — open `blog/your-slug/index.html` directly in a mobile browser (or `termux-open blog/your-slug/index.html`) to check it before committing.
 
 ## Two starter posts included
-- `posts/2026-07-23-welcome-to-stitchflow.md`
+- `posts/2026-07-23-welcome-to-tixthreads.md`
 - `posts/2026-07-24-offline-first-tailoring-app.md`
 
 Edit or delete these — they're real, publishable posts, not placeholders.

@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atrivix — Software for Informal Commerce</title>
 <meta name="description" content="Atrivix builds software for tailors and small businesses that run on hustle, not corporate infrastructure. TixThreads is our first product.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://atrivix.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Atrivix — Software for Informal Commerce">
+<meta property="og:description" content="We build tools for businesses that run on hustle and relationships, not corporate infrastructure.">
+<meta property="og:url" content="https://atrivix.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Atrivix — Software for Informal Commerce">
+<meta name="twitter:description" content="We build tools for businesses that run on hustle and relationships, not corporate infrastructure.">
 <style>
   :root {
     --bg: #0a0c10; --surface: #13161c; --surface-2: #1a1e27; --surface-3: #222836;
@@ -25,9 +34,13 @@
     display: flex; justify-content: space-between; align-items: center;
   }
   .logo { font-size: 1.4rem; font-weight: 800; color: var(--text); text-decoration: none; }
-  nav { display: flex; gap: 2rem; align-items: center; }
+  nav { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
   nav a { color: var(--text-2); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
   nav a:hover { color: var(--accent); }
+  @media (max-width: 480px) {
+    header { flex-direction: column; gap: 0.7rem; padding: 1rem; }
+    nav { gap: 1rem 1.4rem; justify-content: center; }
+  }
   .btn {
     display: inline-flex; align-items: center; gap: 0.4rem;
     padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
@@ -60,8 +73,10 @@
 <header>
   <a href="/" class="logo">Atrivix</a>
   <nav>
+    <a href="/about/">About</a>
     <a href="/services/tixthreads/">TixThreads</a>
     <a href="/blog/">Blog</a>
+    <a href="/faq/">FAQ</a>
     <a href="#contact">Contact</a>
   </nav>
 </header>
@@ -91,7 +106,7 @@
 </main>
 
 <footer>
-  &copy; 2026 Atrivix. <a href="/blog/">Blog</a> · <a href="mailto:support@atrivix.com">Contact</a>
+  &copy; 2026 Atrivix. <a href="/about/">About</a> · <a href="/blog/">Blog</a> · <a href="/faq/">FAQ</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · <a href="mailto:support@atrivix.com">Contact</a>
 </footer>
 
 </body>

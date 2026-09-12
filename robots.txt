@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /services/tixthreads/dashboard.html
+
+Sitemap: https://atrivix.com/sitemap.xml

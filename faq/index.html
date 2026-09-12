@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — Atrivix</title>
+<meta name="description" content="Answers to common questions about Atrivix and TixThreads.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://atrivix.com/faq/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="FAQ — Atrivix">
+<meta property="og:description" content="Answers to common questions about Atrivix and TixThreads.">
+<meta property="og:url" content="https://atrivix.com/faq/">
+<meta name="twitter:card" content="summary">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #13161c; --surface-2: #1a1e27; --surface-3: #222836;
+    --accent: #00d4aa; --accent-hover: #00b894; --accent-dim: rgba(0,212,170,0.1);
+    --text: #e8eaed; --text-2: #9aa0a6; --text-3: #5f6368;
+    --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
+  }
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,12,16,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo { font-size: 1.4rem; font-weight: 800; color: var(--text); text-decoration: none; }
+  nav { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+  nav a { color: var(--text-2); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+  nav a:hover { color: var(--accent); }
+  nav a.active { color: var(--accent); }
+  @media (max-width: 480px) {
+    header { flex-direction: column; gap: 0.7rem; padding: 1rem; }
+    nav { gap: 1rem 1.4rem; justify-content: center; }
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+    border: none; cursor: pointer; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  main.page { max-width: 680px; margin: 0 auto; padding: 8.5rem 1.5rem 5rem; }
+  .page h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; margin-bottom: 2rem; }
+  .faq-item {
+    border-bottom: 1px solid var(--border); padding: 1.4rem 0;
+  }
+  .faq-item:first-of-type { border-top: 1px solid var(--border); }
+  .faq-item h3 { font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text); }
+  .faq-item p { color: var(--text-2); font-size: 0.95rem; }
+  .cta-row { margin-top: 2.5rem; text-align: center; }
+  .cta-row p { color: var(--text-2); margin-bottom: 1rem; }
+  footer { text-align: center; padding: 2rem; color: var(--text-3); font-size: 0.85rem; border-top: 1px solid var(--border); }
+  footer a { color: var(--text-2); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Atrivix</a>
+  <nav>
+    <a href="/about/">About</a>
+    <a href="/services/tixthreads/">TixThreads</a>
+    <a href="/blog/">Blog</a>
+    <a href="/faq/" class="active">FAQ</a>
+    <a href="/#contact">Contact</a>
+  </nav>
+</header>
+
+<main class="page">
+  <h1>Frequently asked questions</h1>
+
+  <div class="faq-item">
+    <h3>What is Atrivix?</h3>
+    <p>Atrivix is a software company building tools for informal commerce — businesses that run on hustle and relationships rather than corporate infrastructure. TixThreads, for bespoke tailors, is our first product.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Does TixThreads work without internet access?</h3>
+    <p>Yes. TixThreads is built offline-first, so you can take orders, log measurements, and manage clients with no signal. It syncs whenever a connection is available.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>How much does TixThreads cost?</h3>
+    <p>TixThreads is currently in early access, so pricing isn't public yet. Reach out and we'll fill you in on where things stand and how to get access.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Who is TixThreads for?</h3>
+    <p>Bespoke tailors and similar made-to-order businesses that need to track client measurements, orders, and delivery status without the overhead of enterprise software.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Is my data safe?</h3>
+    <p>See our <a href="/privacy/" style="color: var(--accent);">Privacy Policy</a> for details on what we collect and how it's handled.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>What's next after TixThreads?</h3>
+    <p>We're planning to bring the same approach — offline-first, workflow-first — to other informal commerce trades. Follow the <a href="/blog/" style="color: var(--accent);">blog</a> for updates.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>How do I get in touch?</h3>
+    <p>Email us any time — we read every message.</p>
+  </div>
+
+  <div class="cta-row">
+    <p>Didn't find your answer?</p>
+    <a href="mailto:support@atrivix.com" class="btn btn-primary">support@atrivix.com</a>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 Atrivix. <a href="/">Home</a> · <a href="/about/">About</a> · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · <a href="mailto:support@atrivix.com">Contact</a>
+</footer>
+
+</body>
+</html>

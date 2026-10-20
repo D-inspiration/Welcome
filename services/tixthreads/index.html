@@ -38,6 +38,8 @@
   .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
   .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .menu-btn { display: none; background: transparent; border: 1px solid var(--border); color: var(--text); width: 42px; height: 42px; border-radius: 8px; font-size: 1.3rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; }
+  .menu-btn:hover { border-color: var(--accent); color: var(--accent); }
   .hero {
     padding: 10rem 2rem 6rem; text-align: center; max-width: 800px; margin: 0 auto;
   }
@@ -129,7 +131,11 @@
   .admin-link:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
   @media (max-width: 640px) {
     header { padding: 1rem; }
-    nav { display: none; }
+    nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0; background: rgba(10,12,16,0.98); border-bottom: 1px solid var(--border); padding: 0.4rem 1rem 1rem; max-height: calc(100vh - 64px); overflow-y: auto; }
+    nav.open { display: flex; }
+    nav a { padding: 0.85rem 0.2rem; border-bottom: 1px solid var(--border); font-size: 1rem; }
+    nav a.btn { margin-top: 0.8rem; justify-content: center; border-bottom: 1px solid var(--border); }
+    .menu-btn { display: inline-flex; }
     .hero { padding: 7rem 1rem 4rem; }
     .step-grid, .feature-grid { grid-template-columns: 1fr; }
     .pipeline { flex-direction: column; align-items: center; }
@@ -141,14 +147,31 @@
 
 <header>
   <div class="logo">Tix<span>Threads</span></div>
-  <nav>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">&#9776;</button>
+  <nav id="siteNav">
     <a href="#how-it-works" data-track="nav-how">How it Works</a>
     <a href="#features" data-track="nav-features">Features</a>
     <a href="#roadmap" data-track="nav-roadmap">Roadmap</a>
+    <a href="pricing/" data-track="nav-pricing">Pricing</a>
+    <a href="about/" data-track="nav-about">About</a>
+    <a href="faq/" data-track="nav-faq">FAQ</a>
     <a href="/blog/" data-track="nav-blog">Blog</a>
-    <a href="dashboard.html" class="btn btn-ghost" data-track="nav-dashboard">Analytics</a>
+    <a href="https://tailor.atrivix.com/" class="btn btn-primary" data-track="nav-open-app">Open app</a>
   </nav>
 </header>
+
+<script>
+(function(){
+  var btn=document.getElementById('menuBtn'), nav=document.getElementById('siteNav');
+  if(!btn||!nav) return;
+  function set(o){nav.classList.toggle('open',o);btn.setAttribute('aria-expanded',o?'true':'false');btn.innerHTML=o?'&#10005;':'&#9776;';btn.setAttribute('aria-label',o?'Close menu':'Open menu');}
+  btn.addEventListener('click',function(e){e.stopPropagation();set(!nav.classList.contains('open'));});
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
+  document.addEventListener('click',function(e){if(!nav.contains(e.target)&&e.target!==btn)set(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
+  window.addEventListener('resize',function(){if(window.innerWidth>640)set(false);});
+})();
+</script>
 
 <section class="hero">
   <h1>A CRM Built for <span>Tailors</span>, Not Tech Bros</h1>
@@ -244,6 +267,10 @@
       <h3>&#9889; Minimal Clicks</h3>
       <p>Every interaction is optimized for speed. Add a customer in 3 taps. Create an order in 5. Less UI, more work done.</p>
     </div>
+    <div class="feature-card">
+      <h3>&#129302; AskThreads</h3>
+      <p>Ask about your own business in plain language, by typing or voice. Snap a photo of a note and the text is read into your question for you to check.</p>
+    </div>
   </div>
 </section>
 
@@ -278,14 +305,6 @@
         <p>Capacity warnings, delay predictions, and trend detection — once we have real usage data to learn from.</p>
       </div>
     </div>
-    <div class="roadmap-item">
-      <div class="roadmap-dot later"></div>
-      <div>
-        <h4>Expand to Barbers, Salons, Mechanics <span class="roadmap-tag tag-later">Later</span></h4>
-        <p>The same workflow compression logic, applied to other informal commerce verticals across West Africa.</p>
-      </div>
-    </div>
-  </div>
 </section>
 
 <section class="cta-section" id="cta">
@@ -299,7 +318,7 @@
 
 <footer>
   <p>TixThreads — Built for tailors who'd rather sew than administrate.</p>
-  <p style="margin-top:0.5rem;"><a href="dashboard.html" data-track="footer-dashboard">Analytics Dashboard</a></p>
+  <p style="margin-top:0.5rem;"><a href="pricing/" data-track="footer-pricing">Pricing</a> &middot; <a href="about/" data-track="footer-about">About</a> &middot; <a href="faq/" data-track="footer-faq">FAQ</a> &middot; <a href="privacy/" data-track="footer-privacy">Privacy</a> &middot; <a href="terms/" data-track="footer-terms">Terms</a> &middot; <a href="dashboard.html" data-track="footer-dashboard">Analytics Dashboard</a></p>
 </footer>
 
 <a href="dashboard.html" class="admin-link" data-track="admin-dashboard-link">&#128202; Dashboard</a>
